@@ -5,7 +5,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 {
     "name": "Account Credit Control",
-    "version": "19.0.1.0.0",
+    "version": "20.0.1.0.0",
     "author": "Camptocamp,"
     "Odoo Community Association (OCA),"
     "Okia,"
@@ -19,7 +19,6 @@
     "data": [
         # Security
         "security/account_security.xml",
-        "security/ir.model.access.csv",
         # Views
         "views/account_move.xml",
         "views/credit_control_line.xml",
@@ -40,6 +39,7 @@
         "wizard/credit_control_marker_view.xml",
         "wizard/credit_control_printer_view.xml",
         "wizard/credit_control_policy_changer_view.xml",
+        "security/ir.access.csv",
     ],
     "demo": ["demo/res_users.xml"],
     "installable": True,
