@@ -54,7 +54,7 @@ class ResPartner(models.Model):
         today = fields.Date.context_today(self)
         if company_id is None:
             company_id = self.env.company.id
-        domain = [
+        return [
             ("move_type", "=", "out_invoice"),
             ("company_id", "=", company_id),
             ("commercial_partner_id", "=", self.commercial_partner_id.id),
@@ -62,7 +62,6 @@ class ResPartner(models.Model):
             ("state", "=", "posted"),
             ("payment_state", "in", ("not_paid", "partial")),
         ]
-        return domain
 
     def _prepare_jump_to_overdue_invoices(self, company_id):
         action = self.env["ir.actions.actions"]._for_xml_id(
@@ -78,5 +77,4 @@ class ResPartner(models.Model):
     def jump_to_overdue_invoices(self):
         self.ensure_one()
         company_id = self.company_id.id or self.env.company.id
-        action = self._prepare_jump_to_overdue_invoices(company_id)
-        return action
+        return self._prepare_jump_to_overdue_invoices(company_id)

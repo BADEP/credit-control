@@ -2,9 +2,9 @@
 # @author: Alexis de Lattre <alexis.delattre@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from odoo import Command
+from odoo import Command, fields
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
@@ -31,7 +31,7 @@ class TestOverdueWarn(TransactionCase):
                 "company_id": cls.company.id,
             }
         )
-        today = datetime.now().date()
+        today = fields.Date.today()
         acc = cls.env["account.account"].search(
             [
                 ("company_ids", "in", cls.company.id),
@@ -68,7 +68,7 @@ class TestOverdueWarn(TransactionCase):
                 "move_type": "out_invoice",
                 "company_id": cls.company.id,
                 "currency_id": cls.company.currency_id.id,
-                "invoice_date": datetime.now().date(),
+                "invoice_date": today,
                 "invoice_date_due": today + timedelta(days=30),
                 "invoice_line_ids": [
                     Command.create(
