@@ -1,7 +1,5 @@
 # Copyright 2016-2021 Tecnativa - Carlos Dauden
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
-from datetime import datetime
-
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
@@ -148,7 +146,6 @@ class ResPartner(models.Model):
     )
     manual_credit_currency_id = fields.Many2one(
         comodel_name="res.currency",
-        string="Manual Credit Currency",
     )
     risk_currency_id = fields.Many2one(
         comodel_name="res.currency", compute="_compute_credit_currency"
@@ -193,7 +190,7 @@ class ResPartner(models.Model):
         global_enabled = (
             self.env["ir.config_parameter"]
             .sudo()
-            .get_param("account_financial_risk.portal_show_financial_risk")
+            .get_str("account_financial_risk.portal_show_financial_risk")
         )
         self.portal_show_financial_risk_visible = str2bool(global_enabled)
 
@@ -202,7 +199,7 @@ class ResPartner(models.Model):
         self.filtered(lambda x: x.sudo().credit_limit == 0.00).date_credit_limit = False
         self.filtered(
             lambda x: x.sudo().credit_limit != 0.00
-        ).date_credit_limit = datetime.today()
+        ).date_credit_limit = fields.Date.today()
 
     @api.depends("credit_limit", "risk_total")
     def _compute_risk_remaining(self):
@@ -395,7 +392,7 @@ class ResPartner(models.Model):
         if not customers:
             return  # pragma: no cover
         groups = self._risk_account_groups()
-        for _key, group in groups.items():
+        for group in groups.values():
             group["read_group"] = self.env["account.move.line"]._read_group(
                 domain=group["domain"] & Domain([("partner_id", "in", customers.ids)]),
                 groupby=group["group_by"],
@@ -472,7 +469,7 @@ class ResPartner(models.Model):
         risk_currency_id = self.risk_currency_id.id
         if currency.id == risk_currency_id:
             return amount_residual_currency
-        elif acc_currency_id == risk_currency_id:
+        if acc_currency_id == risk_currency_id:
             return amount_residual
         return currency._convert(
             amount_residual,
@@ -523,8 +520,7 @@ class ResPartner(models.Model):
         risk_partner_ids = commercial_partners.filtered("risk_exception").ids
         if (operator == "in" and value) or (operator == "not in" and not value):
             return Domain("id", "in", risk_partner_ids)
-        else:
-            return Domain("id", "not in", risk_partner_ids)
+        return Domain("id", "not in", risk_partner_ids)
 
     @api.model
     def _search_risk_remaining_percentage(self, operator, value):
@@ -592,7 +588,7 @@ class ResPartner(models.Model):
     def open_risk_pivot_info(self):
         open_risk_field = self.env.context.get("open_risk_field")
         if not open_risk_field:
-            return  # pragma: no cover
+            return None  # pragma: no cover
         model_name, domain = self._get_field_risk_model_domain(open_risk_field)
         view_name = "financial_risk_{}_pivot_view".format(model_name.replace(".", "_"))
         view_id = (
