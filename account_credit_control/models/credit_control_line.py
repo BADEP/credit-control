@@ -3,8 +3,6 @@
 # Copyright 2020 Manuel Calero - Tecnativa
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import typing
-
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
@@ -21,7 +19,7 @@ class CreditControlLine(models.Model):
     """
 
     _name = "credit.control.line"
-    _inherit: typing.ClassVar[list[str]] = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ["mail.thread", "mail.activity.mixin"]  # noqa: RUF012
     _description = "A credit control line"
     _rec_name = "id"
     _order = "date DESC"
