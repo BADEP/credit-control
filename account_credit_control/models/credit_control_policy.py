@@ -151,8 +151,7 @@ class CreditControlPolicy(models.Model):
         to_add, to_remove = self._get_partner_related_lines(credit_control_run)
         lines = (lines | to_add) - to_remove
         to_add, to_remove = self._get_invoice_related_lines(credit_control_run)
-        lines = (lines | to_add) - to_remove
-        return lines
+        return (lines | to_add) - to_remove
 
     def _lines_different_policy(self, lines):
         """Return a set of move lines ids for which there is an
@@ -258,10 +257,10 @@ class CreditControlPolicy(models.Model):
             if level_line.partner_id.id not in partner_level_dic:
                 partner_level_dic[level_line.partner_id.id] = level
             level_dic[partner_level_dic[level_line.partner_id.id]].append(level_line.id)
-        for level, line_ids in level_dic.items():
+        for partner_level, line_ids in level_dic.items():
             policy_lines_generated += create(
                 AccountMoveLine.browse(line_ids),
-                level,
+                partner_level,
                 credit_control_run.date,
                 credit_control_run.company_id,
                 default_lines_vals=default_lines_vals,

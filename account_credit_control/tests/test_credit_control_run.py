@@ -3,7 +3,6 @@
 # Copyright 2020 Tecnativa - João Marques
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 import re
-from datetime import datetime
 
 from dateutil import relativedelta
 
@@ -109,7 +108,7 @@ class TestCreditControlRunCase(AccountTestInvoicingCommon, TransactionCaseWithUs
             )
         )
         cls.partner.credit_policy_id = cls.policy.id
-        date_invoice = datetime.today() - relativedelta.relativedelta(years=1)
+        date_invoice = fields.Datetime.now() - relativedelta.relativedelta(years=1)
 
         cls.invoice = cls._create_invoice(
             partner_id=cls.partner.id,
@@ -121,6 +120,8 @@ class TestCreditControlRunCase(AccountTestInvoicingCommon, TransactionCaseWithUs
 
 @tagged("post_install", "-at_install")
 class TestCreditControlRun(TestCreditControlRunCase):
+    _test_user_groups = None
+
     def test_check_run_date(self):
         """
         Create a control run older than the last control run
@@ -130,7 +131,7 @@ class TestCreditControlRun(TestCreditControlRunCase):
         )
 
         with self.assertRaises(UserError):
-            today = datetime.today()
+            today = fields.Datetime.now()
             previous_date = today - relativedelta.relativedelta(days=15)
             previous_date_str = fields.Date.to_string(previous_date)
             control_run._check_run_date(previous_date_str)
@@ -226,9 +227,9 @@ class TestCreditControlRun(TestCreditControlRunCase):
         Generate several control run
         """
 
-        six_months = datetime.today() - relativedelta.relativedelta(months=6)
+        six_months = fields.Datetime.now() - relativedelta.relativedelta(months=6)
         six_months_str = fields.Date.to_string(six_months)
-        three_months = datetime.today() - relativedelta.relativedelta(months=2)
+        three_months = fields.Datetime.now() - relativedelta.relativedelta(months=2)
         three_months_str = fields.Date.to_string(three_months)
 
         # First run
@@ -256,6 +257,9 @@ class TestCreditControlRun(TestCreditControlRunCase):
         """
         Test the wizard Credit Control Printer
         """
+        # assign an email so the lines use the email channel: since Odoo 20,
+        # linking records that do not match the m2m field domain raises
+        self.invoice.partner_id.email = "test@test.com"
         control_run = self.env["credit.control.run"].create(
             {"date": fields.Date.today(), "policy_ids": [(6, 0, [self.policy.id])]}
         )

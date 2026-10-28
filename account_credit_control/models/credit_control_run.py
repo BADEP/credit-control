@@ -216,3 +216,4 @@ class CreditControlRun(models.Model):
                 {"line_ids": letter_lines.ids}
             )
             return wiz.print_lines()
+        return None
